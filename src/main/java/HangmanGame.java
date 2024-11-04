@@ -86,10 +86,18 @@ public class HangmanGame {
 
     // обработка выбора Играть или Выйти
     private static boolean playOrQuit() {
-        System.out.println("Поиграем в виселицу? Да - поиграем, Нет - выйти");
+        System.out.println("Поиграем в виселицу? да - поиграем, нет - выйти");
         Scanner in = new Scanner(System.in);
         String answer = in.nextLine(); // читаем строку и записываем в переменную
         //in.close(); // закрываем Scanner иначе может быть утечка ресурсов
+
+        // проверка ввода на валидность (кириллица, одиночная)
+        while (!answer.matches("^(да|нет)$")){
+            //in.close();
+            System.out.println("введи только 'да' или 'нет'");
+            in = new Scanner(System.in);
+            answer = in.next();
+        }
 
         if (answer.equals("да")) {
             System.out.println("""
@@ -198,16 +206,47 @@ public class HangmanGame {
         return "ааввгг";
     }
 
-    // считываем введенную юзером букву
+    // считываем введенную юзером букву и вызыввем метод проверки ее корректности
     private static char readTheEnteredLetter() {
         System.out.printf("у тебя осталось %d попыток \n", 6 - attemptCounter);
         System.out.println("ты называл следующие буквы: " + voicedLetters);
         System.out.println("введи букву");
         Scanner in = new Scanner(System.in);
         String letter = in.next(); // читаем строку и записываем в переменную
+
+        // проверка ввода на валидность (кириллица, одиночная)
+        while (!checkTheLetterForValidity(letter)){
+            //in.close();
+            System.out.println("введи одну прописную букву на кириллице");
+            in = new Scanner(System.in);
+            letter = in.next();
+        }
         // преобразовали строку в символ
         return letter.charAt(0);
     }
+
+    // проверить введенную букву на валидность (кириллица, одиночная)
+    public static boolean checkTheLetterForValidity(String letter) {
+        // ^ и $ начало и конец строки
+        // [а-яё] диапазон символов в котором надо ввести букву
+        // "^[а-яё]{2}$" проверка что введено 2 символа от а до я
+        // matches вернет true если введенный символ в указанном диапазоне
+        return letter.matches("^[а-яё]$");
+    }
+
+//        try{
+//        Scanner in = new Scanner(System.in);
+//        int x = in.nextInt();
+//        if(x>=30){
+//            throw new Exception("Число х должно быть меньше 30");
+//        }
+//    }
+//        catch(Exception ex){
+//
+//        System.out.println(ex.getMessage());
+//    }
+
+
 
     // сохраняем букву в ArrayList
     public static boolean saveLetter(char letter) {
