@@ -1,10 +1,15 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class HangmanGame {
     public static int attemptCounter;// количество попыток
     //public static String hiddenWord;// загаданное слово
-//    public static String[] correctLetters;// массив названных угаданных букв
-//    public static String[] incorrectLetters;// массив названных неправильных букв
+    //public static char[] voicedLetters = new char[33];// массив названных угаданных букв
+    //public static char[] voicedIncorrectLetters = new char[33];// массив названных неправильных букв
+
+    // массив названных букв
+    public static ArrayList<Character> voicedLetters = new ArrayList<>();
+
     // загаданное слово в виде массива символов
     public static char[] hiddenWordArray;
     // маска загаданного слова, вначале состоит из звездочек
@@ -15,7 +20,9 @@ public class HangmanGame {
 
     // показываем приветственное сообщение, рисуем виселицу и начинаем игру или выход
         while (playOrQuit()) {
-            //hiddenWord = makeAWord();// получаем загаданное слово
+            // очищаем массив с названными буквами
+            voicedLetters.clear();
+
             hiddenWordArray = makeAWord().toCharArray();// преобразуем строку в массив символов
             // клонируем массив с загаданным словом
             // ниже заменим все символы на звездочки и будем показывать юзеру именно маску
@@ -32,7 +39,10 @@ public class HangmanGame {
 
             // основной цикл работы программы
             while (attemptCounter < 6) {
-                if (checkingTheEnteredLetter(readTheEnteredLetter())) {
+                while (!saveLetter(readTheEnteredLetter())) {
+                    System.out.println("Ты уже вводил эту букву");
+                }
+                if (checkingTheEnteredLetterInWord(voicedLetters.get(voicedLetters.size() - 1))) {
                     System.out.println("ты молодец - угадал");
                     System.out.println(maskHiddenWordArray);
                 } else {
@@ -43,10 +53,10 @@ public class HangmanGame {
                         System.out.println("Ты проиграл и будешь повешен!");
                         drawHangman(attemptCounter);
                         break;
-
                     }
                     drawHangman(attemptCounter);
                 }
+
                 // проверка на выигрыш
                 if (checkWin()) {
                     System.out.println("Поздравляю, ты выиграл!");
@@ -81,7 +91,7 @@ public class HangmanGame {
         String answer = in.nextLine(); // читаем строку и записываем в переменную
         //in.close(); // закрываем Scanner иначе может быть утечка ресурсов
 
-        if (answer.equals("Да") || answer.equals("да") || answer.equals("y")) {
+        if (answer.equals("да")) {
             System.out.println("""
                 Отлично! я загадаю слово,
                 а ты должен называть буквы и отгодать его
@@ -89,7 +99,7 @@ public class HangmanGame {
                 """);
             drawHangman(6);// метод рисует виселицу
             return true;
-        } else if (answer.equals("Нет") || answer.equals("нет") || answer.equals("n")) {
+        } else if (answer.equals("нет")) {
             System.out.println("Жаль, мне так хотелось тебя вздернуть)))");
             drawHangman(6);
             System.out.println("еще увидимся)))");
@@ -188,30 +198,35 @@ public class HangmanGame {
         return "ааввгг";
     }
 
-//    // меняем количество попыток, вызываем метод до игры
-//    private static int calculateTheNumberOfAttempts() {
-//        return 6;
-//    }
-    // меняем количество попыток, вызываем метод во время игры
-//    private static int calculateTheNumberOfAttempts(int attempt) {
-//        if (attempt == null) {
-//        }
-//        int att = attempt - 1;
-//        return att;
-//    }
-
     // считываем введенную юзером букву
     private static char readTheEnteredLetter() {
         System.out.printf("у тебя осталось %d попыток \n", 6 - attemptCounter);
+        System.out.println("ты называл следующие буквы: " + voicedLetters);
         System.out.println("введи букву");
         Scanner in = new Scanner(System.in);
         String letter = in.next(); // читаем строку и записываем в переменную
-        char singleChar = letter.charAt(0);// преобразовали строку в символ
-        return singleChar;
+        // преобразовали строку в символ
+        return letter.charAt(0);
+    }
+
+    // сохраняем букву в ArrayList
+    public static boolean saveLetter(char letter) {
+        if (checkLetterWasCalled(letter)){
+            return false;
+        }
+        voicedLetters.add(letter);
+        //System.out.println("ты называл следующие буквы: " + voicedLetters);
+        return true;
+    }
+
+    // проверяем называлась ли буква
+    public static boolean checkLetterWasCalled(char letter) {
+//        System.out.println(voicedLetters.contains(letter));
+        return voicedLetters.contains(letter);
     }
 
     // проверяем правильная ли буква, если правильная то записываем ее в маску
-    private static boolean checkingTheEnteredLetter(char singleChar){
+    private static boolean checkingTheEnteredLetterInWord(char singleChar){
         boolean letterExists = false;
 
         for (int i = 0; i < hiddenWordArray.length; i++) {
@@ -228,24 +243,6 @@ public class HangmanGame {
     private static void writeTheLetterInTheMask(int positionLetter, char letter){
         maskHiddenWordArray[positionLetter] = letter;
     }
-
-
-    // обрабатываем написанную пользователем букву
-//    private static void letterProcessing() {
-//
-//
-//        if (letterExists) {
-//            System.out.println("ты молодец - угадал");
-//            System.out.println(maskHiddenWordArray);
-//        } else {
-//            System.out.println("ты ошибся - нет такой буквы");
-//            System.out.println(maskHiddenWordArray);
-//        }
-//        // вызвать метод при не правильной букве
-//        // вызвать метод при правильной букве
-//
-//    }
-
 
     // вывод маски слова
     private static void showMaskWord(){
